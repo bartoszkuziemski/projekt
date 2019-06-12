@@ -1,5 +1,5 @@
 # projekt
 
 sterowanie:
-A D - poruszanie prawo lewo
+A D - poruszanie prawo lewo,
 myszka - celowanie

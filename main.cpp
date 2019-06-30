@@ -147,15 +147,6 @@ public:
     }
     void step(float time,float time_sin)
     {
-        //v=v+gt
-        /*
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-        {
-            velocity_x_=time_sin;
-            velocity_y_=100*sin(time_sin);
-        }
-        */
-
         velocity_y_+=gravity_*time;
         velocity_x_=angle_value_x_*velocity_pocisk_;
 
@@ -182,10 +173,13 @@ private:
 class Ptak
 {
 public:
-    Ptak()
+    Ptak(float velocity_x=300)
     {
+        velocity_x_=velocity_x;
         ptak_.setRadius(20);
         ptak_.setFillColor(sf::Color::Magenta);
+        float y=rand()%400+50;
+        ptak_.setPosition(sf::Vector2f(20,y));
     }
     void draw(sf::RenderWindow &w)
     {
@@ -275,17 +269,14 @@ public:
     {
         owoc_.setRadius(20);
         owoc_.setFillColor(sf::Color::Red);
-    }
-    void draw(sf::RenderWindow &w)
-    {
-        w.draw(owoc_);
-    }
-    void set_owoc_position()
-    {
         float x=rand()%350+980;
         float y=rand()%450+30;
         owoc_.setPosition(sf::Vector2f(x,y));
     }
+    void draw(sf::RenderWindow &w)
+    {
+        w.draw(owoc_);
+    }    
     sf::CircleShape owoc()
     {
         return owoc_;
@@ -296,13 +287,7 @@ private:
     sf::CircleShape owoc_;
 };
 
-class Perk
-{
-    Perk()
-    {
 
-    }
-};
 
 Pocisk rob_pocisk(Czlowiek cz)
 {
@@ -319,7 +304,7 @@ Pocisk rob_pocisk(Czlowiek cz)
 
         return p;
 }
-
+/*
 Ptak rob_ptaka()
 {
     Ptak ptak;
@@ -327,14 +312,14 @@ Ptak rob_ptaka()
     float y=rand()%400+50;
     ptak.set_position(sf::Vector2f(20,y));
     return ptak;
-}
-
+}*/
+/*
 Owoc rob_owoce()
 {
     Owoc owoc;
     owoc.set_owoc_position();
     return owoc;
-}
+}*/
 
 int main() {
     srand (time(NULL));
@@ -359,7 +344,8 @@ int main() {
 
     for(int n=0;n<7;n++)        //ilosc owocow na drzewie
     {
-        owoce.push_back(rob_owoce());
+        Owoc owoc;
+        owoce.push_back(owoc);
     }
 
     sf::Clock clock;
@@ -399,8 +385,8 @@ int main() {
         if(time_sum_ptak>2)     //co jaki czas pojawia sie nowy ptak
         {
             time_sum_ptak=0;
-            ptaki.push_back(rob_ptaka());
-
+            Ptak ptak;
+            ptaki.push_back(ptak);
         }
         //rysowanie pociskow
         for(int i=0;i<pociski.size();i++)

@@ -5,61 +5,74 @@
 #include <cmath>
 #include <time.h>
 #include <cstdlib>
+#include <memory>
 
 class Czlowiek
 {
 public:
     Czlowiek()
     {
-       czlowiek_.setSize(sf::Vector2f(50,100));
-       czlowiek_.setFillColor(sf::Color::Cyan);
+       //czlowiek_.setSize(sf::Vector2f(50,100));
+       //czlowiek_.setFillColor(sf::Color::Cyan);
 
-       lufa_.setSize(sf::Vector2f(70,20));
-       lufa_.setFillColor(sf::Color::Blue);
-       lufa_.setOrigin(70,10);
+       czlowiek_texture_.loadFromFile("czlowiek.png");
+       czlowiek_.setTexture(czlowiek_texture_);
+
+       //karabin_.setSize(sf::Vector2f(70,20));
+       //karabin_.setFillColor(sf::Color::Blue);
+       //karabin_.setOrigin(70,10);
+
+       karabin_texture_.loadFromFile("karabin.png");
+       karabin_.setTexture(karabin_texture_);
+       //1020-660
+       karabin_.setOrigin(70,42);
     }
-    sf::RectangleShape czlowiek()
+    void set_texture(sf::Texture texture)
+    {
+        czlowiek_.setTexture(texture);
+    }
+    sf::Sprite czlowiek()
     {
         return czlowiek_;
     }
-    sf::RectangleShape lufa()
+    sf::Sprite karabin()
     {
-        return lufa_;
+        return karabin_;
     }
     void draw(sf::RenderWindow &w)
     {
         w.draw(czlowiek_);
-        w.draw(lufa_);
+        w.draw(karabin_);
     }
     void set_position(float x, float y)
     {
         czlowiek_.setPosition(x,y);
-        lufa_.setPosition(x+20,y+50);
+        karabin_.setPosition(x+40,y+150);
     }
 
 /*
     void step(float time)
     {
         sf::FloatRect bounds = czlowiek_.getGlobalBounds();
-        float rotation = lufa_.getRotation();
+        float rotation = karabin_.getRotation();
 
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down) && rotation>0.5)
         {
-            lufa_.rotate(-velocity_obr_*time);
+            karabin_.rotate(-velocity_obr_*time);
         }
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && rotation<180)
         {
-            lufa_.rotate(velocity_obr_*time);
+            karabin_.rotate(velocity_obr_*time);
         }
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && bounds.left>0)
         {
             czlowiek_.move(-velocity_x_*time,0);
-            lufa_.move(-velocity_x_*time,0);
+            karabin_.move(-velocity_x_*time,0);
         }
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && bounds.left+bounds.width<1400)
         {
             czlowiek_.move(velocity_x_*time,0);
-            lufa_.move(velocity_x_*time,0);
+            karabin_.move(velocity_x_*time,0);
         }
     }
 */
@@ -67,10 +80,10 @@ public:
     void step(float time, sf::Vector2i mouse_position)
     {
         sf::FloatRect bounds = czlowiek_.getGlobalBounds();
-        float rotation = lufa_.getRotation();
-        sf::Vector2f lufa_position = lufa().getPosition();
-        float x=lufa_position.x-mouse_position.x;
-        float y=lufa_position.y-mouse_position.y;
+        float rotation = karabin_.getRotation();
+        sf::Vector2f karabin_position = karabin().getPosition();
+        float x=karabin_position.x-mouse_position.x;
+        float y=karabin_position.y-mouse_position.y;
         float angle;
         if(x>0)
         {
@@ -84,25 +97,27 @@ public:
 
 
 
-        lufa_.setRotation(angle);
+        karabin_.setRotation(angle);
 
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::A) && bounds.left>0)
         {
             czlowiek_.move(-velocity_x_*time,0);
-            lufa_.move(-velocity_x_*time,0);
+            karabin_.move(-velocity_x_*time,0);
         }
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::D) && bounds.left+bounds.width<1400)
         {
             czlowiek_.move(velocity_x_*time,0);
-            lufa_.move(velocity_x_*time,0);
+            karabin_.move(velocity_x_*time,0);
         }
 
     }    
 
 
 private:
-    sf::RectangleShape czlowiek_;
-    sf::RectangleShape lufa_;
+    sf::Sprite czlowiek_;
+    sf::Texture czlowiek_texture_;
+    sf::Sprite karabin_;
+    sf::Texture karabin_texture_;
     float velocity_x_=200;
     float velocity_obr_=100;
     int pkt_=0;
@@ -113,8 +128,8 @@ class Pocisk
 public:
     Pocisk()
     {
-        pocisk_.setRadius(10);
-        pocisk_.setFillColor(sf::Color::Yellow);
+        pocisk_.setRadius(5);
+        pocisk_.setFillColor(sf::Color::Red);
     }
     void draw(sf::RenderWindow &w)
     {
@@ -122,7 +137,9 @@ public:
     }
     void set_position(sf::Vector2f s)
     {
-        s.y+=30;
+        //ustawienie skad wylatuje pocisk
+        s.y+=120;
+        s.x+=20;
         pocisk_.setPosition(s);
     }
     sf::CircleShape pocisk()
@@ -145,7 +162,7 @@ public:
     {
         velocity_y_=v;
     }
-    void step(float time,float time_sin)
+    void step(float time)
     {
         velocity_y_+=gravity_*time;
         velocity_x_=angle_value_x_*velocity_pocisk_;
@@ -176,10 +193,13 @@ public:
     Ptak(float velocity_x=300)
     {
         velocity_x_=velocity_x;
-        ptak_.setRadius(20);
-        ptak_.setFillColor(sf::Color::Magenta);
+        //ptak_.setRadius(20);
+        //ptak_.setFillColor(sf::Color::Magenta);
         float y=rand()%400+50;
         ptak_.setPosition(sf::Vector2f(20,y));
+
+        ptak_texture_.loadFromFile("ptak.png");
+        ptak_.setTexture(ptak_texture_);
     }
     void draw(sf::RenderWindow &w)
     {
@@ -189,7 +209,7 @@ public:
     {
         ptak_.setPosition(s);
     }
-    sf::CircleShape ptak()
+    sf::Sprite ptak()
     {
         return ptak_;
     }
@@ -222,7 +242,8 @@ public:
         }
     }
 private:
-    sf::CircleShape ptak_;
+    sf::Sprite ptak_;
+    sf::Texture ptak_texture_;
     float velocity_x_=0;
     float velocity_y_=0;
 };
@@ -231,15 +252,20 @@ class Drzewo
 {
 public:
     Drzewo()
-    {
-        drzewo_.setSize(sf::Vector2f(400,500));
-        drzewo_.setFillColor(sf::Color::Green);
+    {        
+        drzewo_texture_.loadFromFile("drzewo.png");
+        drzewo_.setTexture(drzewo_texture_);
+        drzewo_.setScale(1.1,1.1);
     }
     void draw(sf::RenderWindow &w)
     {
         w.draw(drzewo_);
     }
-    sf::RectangleShape drzewo()
+    void set_texture(sf::Texture drzewo_texture)
+    {
+        drzewo_.setTexture(drzewo_texture);
+    }
+    sf::Sprite drzewo()
     {
         return drzewo_;
     }
@@ -259,32 +285,43 @@ public:
         }
     }
 private:
-    sf::RectangleShape drzewo_;
+    sf::Sprite drzewo_;
+    sf::Texture drzewo_texture_;
 };
 
 class Owoc
 {
 public:
+    //virtual ~Owoc() = default;
     Owoc()
     {
-        owoc_.setRadius(20);
-        owoc_.setFillColor(sf::Color::Red);
-        float x=rand()%350+980;
-        float y=rand()%450+30;
+        //owoc_.setRadius(20);
+        //owoc_.setFillColor(sf::Color::Red);
+
+        owoc_texture_.loadFromFile("owoc.png");
+        owoc_.setTexture(owoc_texture_);
+        owoc_.setScale(0.1,0.1);
+
+        float x=rand()%360+940;     //losowo od 940-1300
+        float y=rand()%240+100;      //losowo od 100-340
         owoc_.setPosition(sf::Vector2f(x,y));
+    }
+    void set_texture(sf::Texture owoc_texture)
+    {
+        owoc_.setTexture(owoc_texture);
     }
     void draw(sf::RenderWindow &w)
     {
         w.draw(owoc_);
     }    
-    sf::CircleShape owoc()
+    sf::Sprite owoc()
     {
         return owoc_;
     }
 
 private:
-
-    sf::CircleShape owoc_;
+    sf::Texture owoc_texture_;
+    sf::Sprite owoc_;
 };
 
 
@@ -294,7 +331,7 @@ Pocisk rob_pocisk(Czlowiek cz)
         Pocisk p;
         p.set_position(cz.czlowiek().getPosition());
         p.set_velocity(-1000);
-        float angle=cz.lufa().getRotation();
+        float angle=cz.karabin().getRotation();
         p.set_velocity_y(-1000*sin(angle*3.14/180));
 
         //std::cout << angle << std::endl;
@@ -327,26 +364,44 @@ int main() {
     sf::RenderWindow window(sf::VideoMode(1400, 900), "My window");
 
     std::vector<Pocisk> pociski;
-    std::vector<Ptak> ptaki;
-    std::vector<Owoc> owoce;
+    //std::vector<Ptak> ptaki;
+    //std::vector<Owoc> owoce;
+    std::vector<std::unique_ptr<Owoc>> owoce;
+    std::vector<std::unique_ptr<Ptak>> ptaki;
 
     float time_sum=0;
     float time_sum_ptak=0;
-    float time_sin=0;
+    //float time_sin=0;
 
     int pkt=0;
     //ustawienie czlowieka
     Czlowiek cz;
-    cz.set_position(1000,700);
+    cz.set_position(1000,600);
     //ustawienie drzewa
     Drzewo drzewo;
-    drzewo.set_drzewo_position(980,30);
+    drzewo.set_drzewo_position(800,30);
 
-    for(int n=0;n<7;n++)        //ilosc owocow na drzewie
-    {
-        Owoc owoc;
-        owoce.push_back(owoc);
+    sf::Texture tlo_texture;
+    if (!tlo_texture.loadFromFile("tlo.jpg")) {
+        std::cerr << "Could not load texture" << std::endl;
+        return 1;
     }
+    sf::Sprite tlo;
+    tlo.setTexture(tlo_texture);
+    tlo.setTextureRect(sf::IntRect(150,300,1400,900));
+
+
+    for(int n=0;n<10;n++)        //ilosc owocow na drzewie
+    {
+        //Owoc owoc;
+        //sf::Texture owoc_texture;
+        //owoc_texture.loadFromFile("owoc.png");
+        //owoc.setTexture(owoc_texture);
+
+        owoce.push_back(std::make_unique<Owoc>());
+    }
+
+
 
     sf::Clock clock;
 
@@ -357,7 +412,7 @@ int main() {
 
         time_sum+=time;
         time_sum_ptak+=time;
-        time_sin+=time;
+        //time_sin+=time;
 
         // check all the window's events that were triggered since the last iteration of the loop
         sf::Event event;
@@ -370,8 +425,11 @@ int main() {
         // clear the window with black color
         window.clear(sf::Color::Black);
 
+        window.draw(tlo);
+
         cz.draw(window);
         sf::Vector2i mouse_position = sf::Mouse::getPosition(window);
+        //std::cout << mouse_position.x << "      " << mouse_position.y << std::endl;
         cz.step(time, mouse_position);
         drzewo.draw(window);
 
@@ -385,21 +443,21 @@ int main() {
         if(time_sum_ptak>2)     //co jaki czas pojawia sie nowy ptak
         {
             time_sum_ptak=0;
-            Ptak ptak;
-            ptaki.push_back(ptak);
+            //Ptak ptak;
+            ptaki.push_back(std::make_unique<Ptak>());
         }
         //rysowanie pociskow
         for(int i=0;i<pociski.size();i++)
         {
             pociski[i].draw(window);
-            pociski[i].step(time,time_sin);
+            pociski[i].step(time);
         }
         //rysowanie ptakow
         for(int j=0;j<ptaki.size();j++)
         {
-            ptaki[j].draw(window);
-            ptaki[j].step(time);
-            if(drzewo.owoc_znika(ptaki[j]))     //usuwanie owocow gdy ptak wleci w drzewo
+            ptaki[j]->draw(window);
+            ptaki[j]->step(time);
+            if(drzewo.owoc_znika(*ptaki[j]))     //usuwanie owocow gdy ptak wleci w drzewo
             {
                 owoce.erase(owoce.begin());
                 ptaki.erase(ptaki.begin()+j);
@@ -410,7 +468,7 @@ int main() {
         {
             for(int l=0;l<ptaki.size();l++)
             {
-                if(ptaki[l].hit(pociski[k]))
+                if(ptaki[l]->hit(pociski[k]))
                 {
                     pkt++;
                     std::cout << pkt << std::endl;
@@ -422,13 +480,15 @@ int main() {
         //rysowanie owocow
         for(int m=0;m<owoce.size();m++)
         {
-            owoce[m].draw(window);
+            owoce[m]->draw(window);
+            //window.draw(owoce[m]);
         }
 
 
-
+        //window.draw(owoc);
         window.display();
     }
 
     return 0;
 }
+

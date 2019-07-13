@@ -23,8 +23,7 @@ public:
        //karabin_.setOrigin(70,10);
 
        karabin_texture_.loadFromFile("karabin.png");
-       karabin_.setTexture(karabin_texture_);
-       //1020-660
+       karabin_.setTexture(karabin_texture_);       
        karabin_.setOrigin(70,42);
     }
     void set_texture(sf::Texture texture)
@@ -200,6 +199,12 @@ public:
 
         ptak_texture_.loadFromFile("ptak.png");
         ptak_.setTexture(ptak_texture_);
+        ptak_.setTextureRect({0,0,62,73});
+
+        fly_frames_.push_back({0,0,62,73});
+        fly_frames_.push_back({62,0,63,73});
+        fly_frames_.push_back({125,0,62,73});
+        fly_frames_.push_back({187,0,63,73});
     }
     void draw(sf::RenderWindow &w)
     {
@@ -221,8 +226,20 @@ public:
     {
         velocity_y_=velocity_y;
     }
+    float velocity_x()
+    {
+        return velocity_x_;
+    }
     void step(float time)
     {
+        current_frame_time+=time;
+        while (current_frame_time >= (1.0/fps_))
+        {
+             current_frame_time-=(1.0/fps_);
+             current_frame_index_ = (current_frame_index_ +1) % fly_frames_.size();
+             ptak_.setTextureRect(fly_frames_[current_frame_index_]);
+        }
+
         float change_velocity=rand() % 10000;      //prawdopodobienstwo ze predkosc sie zmieni
         if(change_velocity>9998)
         {
@@ -246,6 +263,10 @@ private:
     sf::Texture ptak_texture_;
     float velocity_x_=0;
     float velocity_y_=0;
+    std::vector<sf::IntRect> fly_frames_;
+    float fps_ = 4.0;
+    float current_frame_time = 0.0;
+    int current_frame_index_ = 0;
 };
 
 class Drzewo
@@ -324,8 +345,6 @@ private:
     sf::Sprite owoc_;
 };
 
-
-
 Pocisk rob_pocisk(Czlowiek cz)
 {
         Pocisk p;
@@ -333,12 +352,9 @@ Pocisk rob_pocisk(Czlowiek cz)
         p.set_velocity(-1000);
         float angle=cz.karabin().getRotation();
         p.set_velocity_y(-1000*sin(angle*3.14/180));
-
         //std::cout << angle << std::endl;
-
         p.set_angle_value_x(cos(angle*3.14/180));
         p.set_angle_value_y(sin(angle*3.14/180));
-
         return p;
 }
 /*
@@ -371,15 +387,19 @@ int main() {
 
     float time_sum=0;
     float time_sum_ptak=0;
-    //float time_sin=0;
+    float czas_ptaka=2;      //co jaki czas pojawia sie nowy ptak
 
     int pkt=0;
+    int pkt_temp=0;
+    int ammo=20;
+    float velocity_x=300;
+
     //ustawienie czlowieka
     Czlowiek cz;
     cz.set_position(1000,600);
     //ustawienie drzewa
     Drzewo drzewo;
-    drzewo.set_drzewo_position(800,30);
+    drzewo.set_drzewo_position(900,30);
 
     sf::Texture tlo_texture;
     if (!tlo_texture.loadFromFile("tlo.jpg")) {
@@ -391,17 +411,13 @@ int main() {
     tlo.setTextureRect(sf::IntRect(150,300,1400,900));
 
 
-    for(int n=0;n<10;n++)        //ilosc owocow na drzewie
-    {
-        //Owoc owoc;
+    for(int n=0;n<5;n++)        //ilosc owocow na drzewie
+    {        
         //sf::Texture owoc_texture;
         //owoc_texture.loadFromFile("owoc.png");
         //owoc.setTexture(owoc_texture);
-
         owoce.push_back(std::make_unique<Owoc>());
     }
-
-
 
     sf::Clock clock;
 
@@ -411,8 +427,7 @@ int main() {
         clock.restart();
 
         time_sum+=time;
-        time_sum_ptak+=time;
-        //time_sin+=time;
+        time_sum_ptak+=time;        
 
         // check all the window's events that were triggered since the last iteration of the loop
         sf::Event event;
@@ -437,15 +452,39 @@ int main() {
         {
             time_sum=0;
             pociski.push_back(rob_pocisk(cz));
+            ammo--;
+            //std::cout << ammo << std::endl;
         }
 
-
-        if(time_sum_ptak>2)     //co jaki czas pojawia sie nowy ptak
+        //zmiana co jaki czas pojawia sie nowy ptak - co 5 punktow ptaki pojawiaja sie coraz szybciej az do granicy 1.2s
+        if(time_sum_ptak>czas_ptaka)
         {
             time_sum_ptak=0;
-            //Ptak ptak;
-            ptaki.push_back(std::make_unique<Ptak>());
+            std::unique_ptr<Ptak> p=std::make_unique<Ptak>();
+            if(pkt_temp>=5  && czas_ptaka>1.3)
+            {
+                pkt_temp=0;
+                czas_ptaka-=0.2;
+            }
+            if(pkt_temp>=6)
+            {
+                pkt_temp=0;
+                velocity_x+=100;
+            }
+            p->set_velocity_x(velocity_x);
+            ptaki.push_back(move(p));
+
         }
+        /*
+        if(pkt_temp>=6)
+        {
+            pkt_temp=0;
+            for (int a=0;a<ptaki.size();a++)
+            {
+               ptaki[a]->set_velocity_x(ptaki[0]->velocity_x()+100);
+            }
+        }
+        */
         //rysowanie pociskow
         for(int i=0;i<pociski.size();i++)
         {
@@ -471,7 +510,10 @@ int main() {
                 if(ptaki[l]->hit(pociski[k]))
                 {
                     pkt++;
-                    std::cout << pkt << std::endl;
+                    pkt_temp++;
+                    ammo++;
+                    //std::cout << pkt << std::endl;
+                    //std::cout << ammo << std::endl;
                     ptaki.erase(ptaki.begin()+l);
                     pociski.erase(pociski.begin()+k);
                 }
@@ -484,6 +526,13 @@ int main() {
             //window.draw(owoce[m]);
         }
 
+        std::cout << "pkt: " << pkt << "     amunicja: " << ammo << std::endl;
+
+        if(owoce.empty() || ammo<=0)
+        {
+            std::cout << "koniec gry, twoj wynik to : " << pkt << std::endl;
+            return 1;
+        }
 
         //window.draw(owoc);
         window.display();
@@ -491,4 +540,5 @@ int main() {
 
     return 0;
 }
+
 

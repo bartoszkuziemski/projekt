@@ -92,9 +92,6 @@ public:
         {
             angle=(180/3.14*atan(y/x))+180;
         }
-        //std::cout << angle << std::endl;
-
-
 
         karabin_.setRotation(angle);
 
@@ -161,15 +158,14 @@ public:
     {
         velocity_y_=v;
     }
-    void step(float time)
-    {
-        velocity_y_+=gravity_*time;
+    void step(float time,float time_sin)
+    {        
         velocity_x_=angle_value_x_*velocity_pocisk_;
-
+        velocity_y_+=gravity_*time;
         pocisk_.move(velocity_x_*time,velocity_y_*time);
 
         //std::cout << velocity_x_ << "    " << velocity_y_ << std::endl;
-        //std::cout << time << std::endl;
+        //std::cout << time_sin << std::endl;
         //std::cout << pocisk_.getPosition().y << std::endl;
         //std::cout << angle_value_x_ << "        " << angle_value_y_ << std::endl;
     }
@@ -387,6 +383,7 @@ int main() {
 
     float time_sum=0;
     float time_sum_ptak=0;
+    float time_sin=0;
     float czas_ptaka=2;      //co jaki czas pojawia sie nowy ptak
 
     int pkt=0;
@@ -427,7 +424,8 @@ int main() {
         clock.restart();
 
         time_sum+=time;
-        time_sum_ptak+=time;        
+        time_sum_ptak+=time;
+        time_sin+=time;
 
         // check all the window's events that were triggered since the last iteration of the loop
         sf::Event event;
@@ -466,7 +464,7 @@ int main() {
                 pkt_temp=0;
                 czas_ptaka-=0.2;
             }
-            if(pkt_temp>=6)
+            if(pkt_temp>=6)     // od 25 zdobytych punktow zwieksza sie predkosc ptakow
             {
                 pkt_temp=0;
                 velocity_x+=100;
@@ -474,22 +472,12 @@ int main() {
             p->set_velocity_x(velocity_x);
             ptaki.push_back(move(p));
 
-        }
-        /*
-        if(pkt_temp>=6)
-        {
-            pkt_temp=0;
-            for (int a=0;a<ptaki.size();a++)
-            {
-               ptaki[a]->set_velocity_x(ptaki[0]->velocity_x()+100);
-            }
-        }
-        */
+        }        
         //rysowanie pociskow
         for(int i=0;i<pociski.size();i++)
         {
             pociski[i].draw(window);
-            pociski[i].step(time);
+            pociski[i].step(time,time_sin);
         }
         //rysowanie ptakow
         for(int j=0;j<ptaki.size();j++)
@@ -522,8 +510,7 @@ int main() {
         //rysowanie owocow
         for(int m=0;m<owoce.size();m++)
         {
-            owoce[m]->draw(window);
-            //window.draw(owoce[m]);
+            owoce[m]->draw(window);            
         }
 
         std::cout << "pkt: " << pkt << "     amunicja: " << ammo << std::endl;
